@@ -34,10 +34,10 @@ logger.info("cm-cli-rest initialized - REST API available at /cm-cli-rest/*")
 class CMCLIRestNode:
     """
     ComfyUI node for triggering cm-cli REST API calls.
-    
+
     This is optional - the REST API works independently.
     """
-    
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -60,13 +60,13 @@ class CMCLIRestNode:
     def execute(self, endpoint: str, trigger: bool, node_name: str = ""):
         """
         Execute API call (synchronous, for simple endpoints only).
-        
+
         Note: For complex operations (install, update), use the REST API directly.
         This node is mainly for health checks and simple queries.
         """
         if not trigger:
             return ("", False)
-        
+
         # For actual implementation, you would make HTTP requests to the API
         # This is a placeholder - in practice, use the REST API directly
         return (f"Use REST API at /cm-cli-rest/{endpoint}", True)

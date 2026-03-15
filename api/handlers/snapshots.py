@@ -17,9 +17,9 @@ class SnapshotsHandler:
     async def save_snapshot(self, request: web.Request) -> web.Response:
         """
         POST /cm-cli-rest/snapshots/save
-        
+
         Save current custom node configuration as a snapshot.
-        
+
         Request body (optional):
         {
             "name": "my-snapshot"  # optional, defaults to timestamp
@@ -31,14 +31,14 @@ class SnapshotsHandler:
             body = {}
 
         snapshot_name = body.get("name")
-        
+
         try:
             command = ["save-snapshot"]
             if snapshot_name:
                 command.append(snapshot_name)
 
             result = await self.executor.execute(command)
-            
+
             if result["success"]:
                 return web.json_response(
                     {
@@ -78,9 +78,9 @@ class SnapshotsHandler:
     async def restore_snapshot(self, request: web.Request) -> web.Response:
         """
         POST /cm-cli-rest/snapshots/restore
-        
+
         Restore custom node configuration from a snapshot.
-        
+
         Request body:
         {
             "name": "my-snapshot"  # required
@@ -118,7 +118,7 @@ class SnapshotsHandler:
                 ["restore-snapshot", snapshot_name],
                 timeout=600
             )
-            
+
             return web.json_response(
                 {
                     "success": True,
@@ -147,9 +147,9 @@ class SnapshotsHandler:
     async def list_snapshots(self, request: web.Request) -> web.Response:
         """
         GET /cm-cli-rest/snapshots
-        
+
         List available snapshots.
-        
+
         Note: cm-cli doesn't have a direct 'list snapshots' command.
         This reads from the snapshots directory if available.
         """

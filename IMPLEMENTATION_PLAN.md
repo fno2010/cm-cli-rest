@@ -1,8 +1,8 @@
 # cm-cli-rest Implementation Plan
 
-**Project**: ComfyUI Custom Node - REST API for cm-cli  
-**Version**: 0.1.0  
-**Last Updated**: 2026-03-15  
+**Project**: ComfyUI Custom Node - REST API for cm-cli
+**Version**: 0.1.0
+**Last Updated**: 2026-03-15
 
 ---
 
@@ -299,7 +299,7 @@ from cm_cli import CMCLIExecutor
 class NodesHandler:
     def __init__(self, executor: CMCLIExecutor):
         self.executor = executor
-    
+
     async def list_nodes(self, request: web.Request) -> web.Response:
         result = await self.executor.execute(["show", "installed"])
         nodes = await self.executor.parse_installed_nodes(result["stdout"])

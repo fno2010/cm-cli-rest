@@ -72,11 +72,11 @@ class CMCLIExecutor:
     Executor for cm-cli commands with async support and job tracking.
 
     Usage:
-        executor = CMCLIExecutor(cm_cli_path="/path/to/cm-cli.py")
-        
+        executor = CMCLIExecutor(cm_cli_path="/path/to/cm-cli")
+
         # Synchronous execution
         result = await executor.execute(["show", "installed"])
-        
+
         # Asynchronous job (for long-running operations)
         job = await executor.execute_async(["install", "ComfyUI-Impact-Pack"])
     """
@@ -91,8 +91,8 @@ class CMCLIExecutor:
         Initialize the cm-cli executor.
 
         Args:
-            cm_cli_path: Path to cm-cli.py script. If None, auto-detects from ComfyUI-Manager.
-            python_path: Path to Python interpreter.
+            cm_cli_path: Path to cm-cli executable. If None, auto-detects from PATH or ComfyUI-Manager.
+            python_path: Path to Python interpreter (used only if cm-cli is a .py script).
             working_dir: Working directory for subprocess execution (usually ComfyUI root).
         """
         self.python_path = python_path
@@ -107,26 +107,41 @@ class CMCLIExecutor:
 
     def _auto_detect_cm_cli(self) -> Path:
         """
-        Auto-detect cm-cli.py location from ComfyUI-Manager installation.
+        Auto-detect cm-cli executable location.
 
-        Searches in common locations:
-        1. custom_nodes/ComfyUI-Manager/cm-cli.py
-        2. custom_nodes/ComfyUI-Manager/cm_cli.py
-        3. Current directory cm-cli.py
+        Searches in order:
+        1. System PATH (cm-cli installed as console script by uv/pip)
+        2. ComfyUI-Manager custom_nodes directory (cm-cli.py script)
+        3. Current working directory
+
+        Returns:
+            Path to cm-cli executable or script.
         """
+        import shutil
+
+        # First, try to find cm-cli in PATH (most common for uv/pip installs)
+        cm_cli_in_path = shutil.which("cm-cli")
+        if cm_cli_in_path:
+            return Path(cm_cli_in_path)
+
+        # Fallback: check if it's cm_cli (underscore variant)
+        cm_cli_underscore = shutil.which("cm_cli")
+        if cm_cli_underscore:
+            return Path(cm_cli_underscore)
+
+        # Last resort: check common ComfyUI-Manager locations for the script
         possible_paths = [
             self.working_dir / "custom_nodes" / "ComfyUI-Manager" / "cm-cli.py",
             self.working_dir / "custom_nodes" / "ComfyUI-Manager" / "cm_cli.py",
             self.working_dir / "cm-cli.py",
-            Path(__file__).parent.parent.parent / "ComfyUI-Manager" / "cm-cli.py",
         ]
 
         for path in possible_paths:
             if path.exists():
                 return path
 
-        # If not found, return default path (will fail if cm-cli not installed)
-        return Path("cm-cli.py")
+        # If not found, return 'cm-cli' and let the subprocess fail with a clear error
+        return Path("cm-cli")
 
     async def execute(
         self,
@@ -148,11 +163,15 @@ class CMCLIExecutor:
         Raises:
             CMCLIError: If command execution fails.
         """
-        command = [str(self.cm_cli_path)] + args
+        # Build command: use cm-cli directly as executable
+        # If it's a .py file, prepend python interpreter
+        if self.cm_cli_path.suffix == ".py":
+            command = [self.python_path, str(self.cm_cli_path)] + args
+        else:
+            command = [str(self.cm_cli_path)] + args
 
         try:
             process = await asyncio.create_subprocess_exec(
-                self.python_path,
                 *command,
                 stdout=asyncio.subprocess.PIPE if capture_output else None,
                 stderr=asyncio.subprocess.PIPE if capture_output else None,
@@ -189,7 +208,8 @@ class CMCLIExecutor:
         except FileNotFoundError as e:
             raise CMCLIError(
                 f"cm-cli not found at {self.cm_cli_path}. "
-                "Ensure ComfyUI-Manager is installed in custom_nodes/.",
+                "Ensure ComfyUI-Manager is installed and cm-cli is in PATH, "
+                "or set cm_cli_path in configuration.",
                 command=command,
             ) from e
         except Exception as e:
@@ -216,7 +236,13 @@ class CMCLIExecutor:
             CMCLIJob object for tracking execution.
         """
         job_id = str(uuid.uuid4())[:8]
-        command = [str(self.cm_cli_path)] + args
+
+        # Build command: use cm-cli directly as executable
+        # If it's a .py file, prepend python interpreter
+        if self.cm_cli_path.suffix == ".py":
+            command = [self.python_path, str(self.cm_cli_path)] + args
+        else:
+            command = [str(self.cm_cli_path)] + args
 
         job = CMCLIJob(
             job_id=job_id,
@@ -229,7 +255,6 @@ class CMCLIExecutor:
 
         try:
             process = await asyncio.create_subprocess_exec(
-                self.python_path,
                 *command,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,

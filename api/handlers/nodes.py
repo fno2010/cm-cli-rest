@@ -18,12 +18,12 @@ class NodesHandler:
     async def list_nodes(self, request: web.Request) -> web.Response:
         """
         GET /cm-cli-rest/nodes
-        
+
         List all installed custom nodes.
         """
         try:
             result = await self.executor.execute(["show", "installed"])
-            
+
             if not result["success"]:
                 return web.json_response(
                     {
@@ -38,7 +38,7 @@ class NodesHandler:
                 )
 
             nodes = await self.executor.parse_installed_nodes(result["stdout"])
-            
+
             return web.json_response(
                 {
                     "success": True,
@@ -66,11 +66,11 @@ class NodesHandler:
     async def get_node(self, request: web.Request) -> web.Response:
         """
         GET /cm-cli-rest/nodes/:name
-        
+
         Get details for a specific node.
         """
         node_name = request.match_info.get("name")
-        
+
         if not node_name:
             return web.json_response(
                 {
@@ -85,7 +85,7 @@ class NodesHandler:
 
         try:
             result = await self.executor.execute(["show", "installed"])
-            
+
             if not result["success"]:
                 return web.json_response(
                     {
@@ -136,9 +136,9 @@ class NodesHandler:
     async def install_node(self, request: web.Request) -> web.Response:
         """
         POST /cm-cli-rest/nodes/install
-        
+
         Install a custom node (async operation).
-        
+
         Request body:
         {
             "name": "ComfyUI-Impact-Pack",
@@ -175,17 +175,17 @@ class NodesHandler:
 
         # Build command
         command = ["install", node_name]
-        
+
         if body.get("channel"):
             command.extend(["--channel", body["channel"]])
-        
+
         if body.get("mode"):
             command.extend(["--mode", body["mode"]])
 
         try:
             # Execute asynchronously
             job = await self.executor.execute_async(command, timeout=300)
-            
+
             return web.json_response(
                 {
                     "success": True,
@@ -214,7 +214,7 @@ class NodesHandler:
     async def uninstall_node(self, request: web.Request) -> web.Response:
         """
         POST /cm-cli-rest/nodes/uninstall
-        
+
         Uninstall a custom node.
         """
         try:
@@ -246,7 +246,7 @@ class NodesHandler:
 
         try:
             result = await self.executor.execute(["uninstall", node_name])
-            
+
             if result["success"]:
                 return web.json_response(
                     {
@@ -285,7 +285,7 @@ class NodesHandler:
     async def update_node(self, request: web.Request) -> web.Response:
         """
         POST /cm-cli-rest/nodes/update
-        
+
         Update a custom node (async operation).
         """
         try:
@@ -317,7 +317,7 @@ class NodesHandler:
 
         try:
             job = await self.executor.execute_async(["update", node_name], timeout=300)
-            
+
             return web.json_response(
                 {
                     "success": True,
@@ -346,12 +346,12 @@ class NodesHandler:
     async def update_all_nodes(self, request: web.Request) -> web.Response:
         """
         POST /cm-cli-rest/nodes/update-all
-        
+
         Update all custom nodes (async operation).
         """
         try:
             job = await self.executor.execute_async(["update", "all"], timeout=600)
-            
+
             return web.json_response(
                 {
                     "success": True,
@@ -380,7 +380,7 @@ class NodesHandler:
     async def enable_node(self, request: web.Request) -> web.Response:
         """
         POST /cm-cli-rest/nodes/enable
-        
+
         Enable a disabled custom node.
         """
         try:
@@ -412,7 +412,7 @@ class NodesHandler:
 
         try:
             result = await self.executor.execute(["enable", node_name])
-            
+
             if result["success"]:
                 return web.json_response(
                     {
@@ -451,7 +451,7 @@ class NodesHandler:
     async def disable_node(self, request: web.Request) -> web.Response:
         """
         POST /cm-cli-rest/nodes/disable
-        
+
         Disable a custom node.
         """
         try:
@@ -483,7 +483,7 @@ class NodesHandler:
 
         try:
             result = await self.executor.execute(["disable", node_name])
-            
+
             if result["success"]:
                 return web.json_response(
                     {
@@ -522,7 +522,7 @@ class NodesHandler:
     async def fix_node(self, request: web.Request) -> web.Response:
         """
         POST /cm-cli-rest/nodes/fix
-        
+
         Fix a custom node's dependencies.
         """
         try:
@@ -554,7 +554,7 @@ class NodesHandler:
 
         try:
             job = await self.executor.execute_async(["fix", node_name], timeout=300)
-            
+
             return web.json_response(
                 {
                     "success": True,
@@ -583,7 +583,7 @@ class NodesHandler:
     async def reinstall_node(self, request: web.Request) -> web.Response:
         """
         POST /cm-cli-rest/nodes/reinstall
-        
+
         Reinstall a custom node (async operation).
         """
         try:
@@ -615,7 +615,7 @@ class NodesHandler:
 
         try:
             job = await self.executor.execute_async(["reinstall", node_name], timeout=300)
-            
+
             return web.json_response(
                 {
                     "success": True,

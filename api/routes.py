@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def setup_routes(app: web.Application, executor: CMCLIExecutor) -> None:
     """
     Register all REST API routes with the aiohttp application.
-    
+
     Args:
         app: aiohttp web application (PromptServer.instance.app)
         executor: CMCLIExecutor instance for command execution
@@ -55,11 +55,11 @@ def setup_routes(app: web.Application, executor: CMCLIExecutor) -> None:
 async def health_check(request: web.Request) -> web.Response:
     """
     GET /cm-cli-rest/health
-    
+
     Health check endpoint.
     """
     from datetime import datetime
-    
+
     return web.json_response(
         {
             "status": "healthy",

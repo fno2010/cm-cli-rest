@@ -17,11 +17,11 @@ class JobsHandler:
     async def get_job(self, request: web.Request) -> web.Response:
         """
         GET /cm-cli-rest/jobs/:id
-        
+
         Get status of an async job.
         """
         job_id = request.match_info.get("id")
-        
+
         if not job_id:
             return web.json_response(
                 {
@@ -35,7 +35,7 @@ class JobsHandler:
             )
 
         job = self.executor.get_job(job_id)
-        
+
         if not job:
             return web.json_response(
                 {
@@ -58,11 +58,11 @@ class JobsHandler:
     async def list_jobs(self, request: web.Request) -> web.Response:
         """
         GET /cm-cli-rest/jobs
-        
+
         List all jobs (active and completed).
         """
         jobs = self.executor.list_jobs()
-        
+
         return web.json_response(
             {
                 "success": True,
@@ -76,11 +76,11 @@ class JobsHandler:
     async def cleanup_job(self, request: web.Request) -> web.Response:
         """
         DELETE /cm-cli-rest/jobs/:id
-        
+
         Remove a job from tracking (doesn't stop execution).
         """
         job_id = request.match_info.get("id")
-        
+
         if not job_id:
             return web.json_response(
                 {
