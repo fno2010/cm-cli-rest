@@ -1,0 +1,9 @@
+# cm-cli-rest Requirements
+# No additional dependencies beyond ComfyUI's built-in packages
+
+# ComfyUI already includes:
+# - aiohttp (HTTP server)
+# - asyncio (async operations)
+
+# Optional: For enhanced logging (uncomment if needed)
+# python-json-logger>=2.0.0

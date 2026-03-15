@@ -1,0 +1,9 @@
+{
+  "enabled": true,
+  "api_key": null,
+  "cm_cli_path": null,
+  "python_path": "python",
+  "timeout": 300,
+  "max_concurrent_jobs": 3,
+  "logging_level": "INFO"
+}

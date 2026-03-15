@@ -1,0 +1,213 @@
+{
+  "examples": [
+    {
+      "name": "Health Check",
+      "method": "GET",
+      "endpoint": "/cm-cli-rest/health",
+      "description": "Check if the API is running",
+      "curl": "curl http://localhost:8188/cm-cli-rest/health",
+      "response": {
+        "status": "healthy",
+        "service": "cm-cli-rest",
+        "version": "0.1.0",
+        "timestamp": "2026-03-15T10:00:00Z"
+      }
+    },
+    {
+      "name": "List Installed Nodes",
+      "method": "GET",
+      "endpoint": "/cm-cli-rest/nodes",
+      "description": "Get all installed custom nodes",
+      "curl": "curl http://localhost:8188/cm-cli-rest/nodes",
+      "response": {
+        "success": true,
+        "data": {
+          "nodes": [
+            {
+              "name": "ComfyUI-Impact-Pack",
+              "repo": "https://github.com/ltdrdata/ComfyUI-Impact-Pack",
+              "version": "5.12.0"
+            }
+          ],
+          "total": 1
+        }
+      }
+    },
+    {
+      "name": "Install Node",
+      "method": "POST",
+      "endpoint": "/cm-cli-rest/nodes/install",
+      "description": "Install a new custom node (async)",
+      "curl": "curl -X POST http://localhost:8188/cm-cli-rest/nodes/install -H 'Content-Type: application/json' -d '{\"name\": \"ComfyUI-Impact-Pack\"}'",
+      "request": {
+        "name": "ComfyUI-Impact-Pack",
+        "channel": "recent",
+        "mode": "remote"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "job_id": "abc12345",
+          "status": "running",
+          "message": "Installation started for 'ComfyUI-Impact-Pack'"
+        }
+      }
+    },
+    {
+      "name": "Get Job Status",
+      "method": "GET",
+      "endpoint": "/cm-cli-rest/jobs/abc12345",
+      "description": "Check status of async operation",
+      "curl": "curl http://localhost:8188/cm-cli-rest/jobs/abc12345",
+      "response": {
+        "success": true,
+        "data": {
+          "job_id": "abc12345",
+          "command": "cm-cli.py install ComfyUI-Impact-Pack",
+          "status": "completed",
+          "exit_code": 0,
+          "stdout": "Installation complete...",
+          "stderr": "",
+          "created_at": "2026-03-15T10:00:00Z",
+          "started_at": "2026-03-15T10:00:01Z",
+          "completed_at": "2026-03-15T10:00:30Z"
+        }
+      }
+    },
+    {
+      "name": "Update All Nodes",
+      "method": "POST",
+      "endpoint": "/cm-cli-rest/nodes/update-all",
+      "description": "Update all installed custom nodes",
+      "curl": "curl -X POST http://localhost:8188/cm-cli-rest/nodes/update-all",
+      "response": {
+        "success": true,
+        "data": {
+          "job_id": "xyz789",
+          "status": "running",
+          "message": "Update all nodes started"
+        }
+      }
+    },
+    {
+      "name": "Save Snapshot",
+      "method": "POST",
+      "endpoint": "/cm-cli-rest/snapshots/save",
+      "description": "Save current node configuration",
+      "curl": "curl -X POST http://localhost:8188/cm-cli-rest/snapshots/save -H 'Content-Type: application/json' -d '{\"name\": \"backup-2026-03-15\"}'",
+      "request": {
+        "name": "backup-2026-03-15"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "message": "Snapshot saved successfully",
+          "name": "backup-2026-03-15"
+        }
+      }
+    },
+    {
+      "name": "Restore Snapshot",
+      "method": "POST",
+      "endpoint": "/cm-cli-rest/snapshots/restore",
+      "description": "Restore from saved snapshot",
+      "curl": "curl -X POST http://localhost:8188/cm-cli-rest/snapshots/restore -H 'Content-Type: application/json' -d '{\"name\": \"backup-2026-03-15\"}'",
+      "request": {
+        "name": "backup-2026-03-15"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "job_id": "restore123",
+          "status": "running",
+          "message": "Restore started for snapshot 'backup-2026-03-15'"
+        }
+      }
+    },
+    {
+      "name": "Disable Node",
+      "method": "POST",
+      "endpoint": "/cm-cli-rest/nodes/disable",
+      "description": "Disable a custom node",
+      "curl": "curl -X POST http://localhost:8188/cm-cli-rest/nodes/disable -H 'Content-Type: application/json' -d '{\"name\": \"ComfyUI-Impact-Pack\"}'",
+      "request": {
+        "name": "ComfyUI-Impact-Pack"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "message": "Node 'ComfyUI-Impact-Pack' disabled successfully"
+        }
+      }
+    },
+    {
+      "name": "Enable Node",
+      "method": "POST",
+      "endpoint": "/cm-cli-rest/nodes/enable",
+      "description": "Enable a disabled custom node",
+      "curl": "curl -X POST http://localhost:8188/cm-cli-rest/nodes/enable -H 'Content-Type: application/json' -d '{\"name\": \"ComfyUI-Impact-Pack\"}'",
+      "request": {
+        "name": "ComfyUI-Impact-Pack"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "message": "Node 'ComfyUI-Impact-Pack' enabled successfully"
+        }
+      }
+    },
+    {
+      "name": "Get Specific Node",
+      "method": "GET",
+      "endpoint": "/cm-cli-rest/nodes/ComfyUI-Impact-Pack",
+      "description": "Get details for a specific node",
+      "curl": "curl http://localhost:8188/cm-cli-rest/nodes/ComfyUI-Impact-Pack",
+      "response": {
+        "success": true,
+        "data": {
+          "node": {
+            "name": "ComfyUI-Impact-Pack",
+            "repo": "https://github.com/ltdrdata/ComfyUI-Impact-Pack",
+            "version": "5.12.0",
+            "status": "enabled"
+          }
+        }
+      }
+    }
+  ],
+  "error_examples": [
+    {
+      "name": "Node Not Found",
+      "status": 404,
+      "response": {
+        "success": false,
+        "error": {
+          "code": "NODE_NOT_FOUND",
+          "message": "Node 'invalid-node' not found"
+        }
+      }
+    },
+    {
+      "name": "Invalid Request",
+      "status": 400,
+      "response": {
+        "success": false,
+        "error": {
+          "code": "INVALID_REQUEST",
+          "message": "Node 'name' is required"
+        }
+      }
+    },
+    {
+      "name": "Job Not Found",
+      "status": 404,
+      "response": {
+        "success": false,
+        "error": {
+          "code": "JOB_NOT_FOUND",
+          "message": "Job 'abc123' not found"
+        }
+      }
+    }
+  ]
+}
