@@ -1,11 +1,7 @@
-"""API handlers for comfy-cli REST API."""
+"""API handlers package."""
 
-from .config import ConfigHandler
-from .models import ModelHandler
-from .nodes import NodeHandler
+# Export handlers for both cm-cli and comfy-cli
+# Note: nodes.py contains NodesHandler (cm-cli)
+# comfy_nodes.py contains NodeHandler (comfy-cli)
 
-__all__ = [
-    "ConfigHandler",
-    "ModelHandler",
-    "NodeHandler",
-]
+__all__ = []
