@@ -1,7 +1,8 @@
 """
-cm-cli-rest: REST API for ComfyUI-Manager CLI
+#BM|cm-cli-rest & comfy-cli REST: REST API for ComfyUI management
 
-A ComfyUI custom node that exposes REST API endpoints for managing
+#TB|A ComfyUI custom node that exposes REST API endpoints for managing
+#KK|custom nodes via cm-cli (ComfyUI-Manager CLI) and comfy-cli.
 custom nodes via cm-cli (ComfyUI-Manager CLI).
 
 Usage:
@@ -14,19 +15,30 @@ from server import PromptServer
 import logging
 
 from .cm_cli import CMCLIExecutor
+from .comfy_cli import ComfyCliExecutor
+from .api.routes import setup_routes
+from .comfy_cli_routes import setup_comfy_cli_routes
 from .api.routes import setup_routes
 
 logger = logging.getLogger(__name__)
 
 # Initialize cm-cli executor
+executor = CMCLIExecutor()
+
+# Initialize comfy-cli executor
+comfy_executor = ComfyCliExecutor()
 # Auto-detects cm-cli.py from ComfyUI-Manager installation
 executor = CMCLIExecutor()
 
-# Register API routes with ComfyUI's built-in server
+# Register cm-cli REST API routes
+setup_routes(PromptServer.instance.app, executor)
+
+# Register comfy-cli REST API routes
+setup_comfy_cli_routes(PromptServer.instance.app, comfy_executor)
 # This integrates our REST API into ComfyUI's aiohttp server
 setup_routes(PromptServer.instance.app, executor)
 
-logger.info("cm-cli-rest initialized - REST API available at /cm-cli-rest/*")
+logger.info("cm-cli-rest & comfy-cli REST initialized - APIs available at /cm-cli-rest/* and /comfy-cli/*")
 
 
 # Optional: ComfyUI workflow node for triggering API calls

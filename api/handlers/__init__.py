@@ -1,6 +1,11 @@
-"""API route handlers."""
+"""API handlers for comfy-cli REST API."""
 
-from .nodes import NodesHandler
-from .snapshots import SnapshotsHandler
+from .config import ConfigHandler
+from .models import ModelHandler
+from .nodes import NodeHandler
 
-__all__ = ["NodesHandler", "SnapshotsHandler"]
+__all__ = [
+    "ConfigHandler",
+    "ModelHandler",
+    "NodeHandler",
+]

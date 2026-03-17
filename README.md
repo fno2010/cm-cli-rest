@@ -1,12 +1,12 @@
-# cm-cli-rest
+# cm-cli-rest & comfy-cli REST
 
-A ComfyUI custom node that exposes REST API endpoints for managing ComfyUI custom nodes via `cm-cli` (ComfyUI-Manager CLI).
+A ComfyUI custom node that exposes REST API endpoints for managing ComfyUI custom nodes and models via `cm-cli` (ComfyUI-Manager CLI) and `comfy-cli`.
 
 ## Features
 
-- 🚀 **REST API for cm-cli**: Control ComfyUI-Manager from external applications
+- 🚀 **Dual CLI Support**: REST APIs for both cm-cli and comfy-cli
 - 🔗 **Integrated with ComfyUI**: Uses ComfyUI's built-in server (no separate port)
-- ⚡ **Async Operations**: Long-running commands (install, update) run asynchronously
+- ⚡ **Async Operations**: Long-running commands (install, update, download) run asynchronously
 - 📊 **Job Tracking**: Monitor progress of async operations
 - 🛡️ **Error Handling**: Comprehensive error responses with status codes
 - 🔐 **Optional Authentication**: API key support for exposed instances
@@ -18,6 +18,7 @@ A ComfyUI custom node that exposes REST API endpoints for managing ComfyUI custo
 - ComfyUI 0.15+
 - ComfyUI-Manager 4.0+ (provides `cm-cli`)
 - Python 3.9+
+- comfy-cli (optional, for model management): `pip install comfy-cli`
 
 ### Steps
 
@@ -28,16 +29,22 @@ A ComfyUI custom node that exposes REST API endpoints for managing ComfyUI custo
    git clone https://github.com/YOUR_USERNAME/cm-cli-rest.git
    ```
 
-2. **Restart ComfyUI**
+2. **Install comfy-cli** (optional, for model management):
 
-3. **Verify installation**: Check ComfyUI console for:
+   ```bash
+   pip install comfy-cli
    ```
-   cm-cli-rest initialized - REST API available at /cm-cli-rest/*
+
+3. **Restart ComfyUI**
+
+4. **Verify installation**: Check ComfyUI console for:
+   ```
+   cm-cli-rest & comfy-cli REST initialized - APIs available at /cm-cli-rest/* and /comfy-cli/*
    ```
 
 ## Quick Start
 
-### Health Check
+### Health Check (cm-cli)
 
 ```bash
 curl http://localhost:8188/cm-cli-rest/health
@@ -53,13 +60,13 @@ Response:
 }
 ```
 
-### List Installed Nodes
+### List Installed Nodes (cm-cli)
 
 ```bash
 curl http://localhost:8188/cm-cli-rest/nodes
 ```
 
-### Install a Node
+### Install a Node (cm-cli)
 
 ```bash
 curl -X POST http://localhost:8188/cm-cli-rest/nodes/install \
@@ -79,6 +86,23 @@ Response (202 Accepted):
 }
 ```
 
+### List Models (comfy-cli)
+
+```bash
+curl "http://localhost:8188/comfy-cli/model/list?relative_path=models/checkpoints"
+```
+
+### Download a Model (comfy-cli)
+
+```bash
+curl -X POST "http://localhost:8188/comfy-cli/model/download" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://civitai.com/models/43331",
+    "relative_path": "models/checkpoints"
+  }'
+```
+
 ### Check Job Status
 
 ```bash
@@ -87,7 +111,9 @@ curl http://localhost:8188/cm-cli-rest/jobs/abc12345
 
 ## API Endpoints
 
-### Health & Status
+### cm-cli REST API (`/cm-cli-rest/*`)
+
+#### Health & Status
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -96,7 +122,7 @@ curl http://localhost:8188/cm-cli-rest/jobs/abc12345
 | `GET` | `/cm-cli-rest/jobs/:id` | Get job status |
 | `DELETE` | `/cm-cli-rest/jobs/:id` | Remove job from tracking |
 
-### Node Management
+#### Node Management
 
 | Method | Endpoint | Description | Async |
 |--------|----------|-------------|-------|
@@ -111,7 +137,7 @@ curl http://localhost:8188/cm-cli-rest/jobs/abc12345
 | `POST` | `/cm-cli-rest/nodes/fix` | Fix node dependencies | ✅ |
 | `POST` | `/cm-cli-rest/nodes/reinstall` | Reinstall node | ✅ |
 
-### Snapshots
+#### Snapshots
 
 | Method | Endpoint | Description | Async |
 |--------|----------|-------------|-------|
@@ -119,9 +145,40 @@ curl http://localhost:8188/cm-cli-rest/jobs/abc12345
 | `POST` | `/cm-cli-rest/snapshots/restore` | Restore snapshot | ✅ |
 | `GET` | `/cm-cli-rest/snapshots` | List snapshots | No |
 
+### comfy-cli REST API (`/comfy-cli/*`)
+
+#### Configuration
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/comfy-cli/config/env` | Get environment config |
+| `GET` | `/comfy-cli/config/which` | Get workspace path |
+| `POST` | `/comfy-cli/config/set-default` | Set default workspace |
+
+#### Model Management
+
+| Method | Endpoint | Description | Async |
+|--------|----------|-------------|-------|
+| `GET` | `/comfy-cli/model/list` | List models | No |
+| `POST` | `/comfy-cli/model/download` | Download model | ✅ |
+| `GET` | `/comfy-cli/model/download/:id/status` | Get download status | No |
+| `POST` | `/comfy-cli/model/remove` | Remove model | No |
+
+#### Node Management
+
+| Method | Endpoint | Description | Async |
+|--------|----------|-------------|-------|
+| `GET` | `/comfy-cli/node/simple-show` | List nodes (simple) | No |
+| `GET` | `/comfy-cli/node/show` | List nodes (detailed) | No |
+| `POST` | `/comfy-cli/node/install` | Install node | ✅ |
+| `POST` | `/comfy-cli/node/update` | Update node | ✅ |
+| `POST` | `/comfy-cli/node/enable` | Enable node | No |
+| `POST` | `/comfy-cli/node/disable` | Disable node | No |
+| `POST` | `/comfy-cli/node/uninstall` | Uninstall node | No |
+
 ## Request/Response Examples
 
-### Install Node with Options
+### cm-cli: Install Node with Options
 
 ```bash
 curl -X POST http://localhost:8188/cm-cli-rest/nodes/install \
@@ -133,13 +190,13 @@ curl -X POST http://localhost:8188/cm-cli-rest/nodes/install \
   }'
 ```
 
-### Update All Nodes
+### cm-cli: Update All Nodes
 
 ```bash
 curl -X POST http://localhost:8188/cm-cli-rest/nodes/update-all
 ```
 
-### Save Snapshot
+### cm-cli: Save Snapshot
 
 ```bash
 curl -X POST http://localhost:8188/cm-cli-rest/snapshots/save \
@@ -147,12 +204,33 @@ curl -X POST http://localhost:8188/cm-cli-rest/snapshots/save \
   -d '{"name": "pre-update-backup"}'
 ```
 
-### Restore Snapshot
+### comfy-cli: Download Model
 
 ```bash
-curl -X POST http://localhost:8188/cm-cli-rest/snapshots/restore \
+curl -X POST "http://localhost:8188/comfy-cli/model/download" \
   -H "Content-Type: application/json" \
-  -d '{"name": "pre-update-backup"}'
+  -d '{
+    "url": "https://civitai.com/models/43331",
+    "relative_path": "models/checkpoints",
+    "filename": "my_model.safetensors"
+  }'
+```
+
+### comfy-cli: List Installed Nodes
+
+```bash
+curl "http://localhost:8188/comfy-cli/node/simple-show?mode=installed"
+```
+
+### comfy-cli: Install Node
+
+```bash
+curl -X POST "http://localhost:8188/comfy-cli/node/install" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nodes": ["ComfyUI-Impact-Pack"],
+    "fast_deps": true
+  }'
 ```
 
 ## Error Responses
@@ -170,7 +248,7 @@ All errors follow this format:
 }
 ```
 
-### Common Error Codes
+### Common Error Codes (cm-cli)
 
 | Code | HTTP Status | Description |
 |------|-------------|-------------|
@@ -180,6 +258,16 @@ All errors follow this format:
 | `JOB_NOT_FOUND` | 404 | Job ID not found |
 | `TIMEOUT` | 504 | Command timed out |
 | `INVALID_REQUEST` | 400 | Malformed request |
+
+### Common Error Codes (comfy-cli)
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `COMFY_CLI_ERROR` | 500 | comfy-cli execution failed |
+| `COMMAND_FAILED` | 500 | CLI command returned error |
+| `MISSING_PARAMETER` | 400 | Required parameter missing |
+| `INVALID_PARAMETER` | 400 | Invalid parameter value |
+| `JOB_NOT_FOUND` | 404 | Async job ID not found |
 
 ## Configuration
 
@@ -201,17 +289,23 @@ Edit `config/config.json`:
 
 ```
 cm-cli-rest/
-├── __init__.py           # Entry point, route registration
+├── __init__.py              # Entry point, initializes both executors
 ├── api/
-│   ├── routes.py         # Route definitions
+│   ├── routes.py            # cm-cli route definitions
 │   └── handlers/
-│       ├── nodes.py      # Node management endpoints
-│       ├── snapshots.py  # Snapshot endpoints
-│       └── jobs.py       # Job tracking endpoints
+│       ├── nodes.py         # Node management (cm-cli)
+│       ├── snapshots.py     # Snapshots (cm-cli)
+│       ├── jobs.py          # Job tracking (shared)
+│       ├── config.py        # Config (comfy-cli)
+│       ├── models.py        # Models (comfy-cli)
+│       └── comfy_nodes.py   # Nodes (comfy-cli)
 ├── cm_cli/
-│   └── executor.py       # cm-cli subprocess execution
+│   └── executor.py          # cm-cli subprocess execution
+├── comfy_cli/
+│   └── executor.py          # comfy-cli subprocess execution
+├── comfy_cli_routes.py      # comfy-cli route registration
 ├── config/
-│   └── config.json       # Configuration file
+│   └── config.json          # Configuration file
 └── README.md
 ```
 
@@ -231,11 +325,25 @@ cm-cli-rest/
 pytest tests/
 ```
 
+### Syntax Validation
+
+```bash
+# Check all Python files
+find . -name "*.py" -not -path "./__pycache__/*" -exec python -m py_compile {} \;
+
+# Lint
+ruff check .
+ruff check --fix .
+
+# Type check
+mypy cm_cli/ comfy_cli/
+```
+
 ### Adding New Endpoints
 
-1. Add handler method in `api/handlers/*.py`
-2. Register route in `api/routes.py`
-3. Update this README
+1. Add handler method in appropriate `api/handlers/*.py` file
+2. Register route in `api/routes.py` (cm-cli) or `comfy_cli_routes.py` (comfy-cli)
+3. Update this README or `COMFY_CLI_API.md`
 
 ## Troubleshooting
 
@@ -244,6 +352,16 @@ pytest tests/
 **Error**: `CM_CLI_NOT_FOUND`
 
 **Solution**: Ensure ComfyUI-Manager is installed in `custom_nodes/ComfyUI-Manager/`
+
+### comfy-cli Not Found
+
+**Error**: `COMFY_CLI_ERROR: comfy-cli not found`
+
+**Solution**:
+```bash
+pip install comfy-cli
+comfy --version  # Verify installation
+```
 
 ### Port Conflicts
 
@@ -258,6 +376,13 @@ Increase `timeout` in `config/config.json` for slow operations.
 - **API Key**: Set `api_key` in config if exposing externally
 - **Input Sanitization**: All inputs validated before subprocess execution
 - **Path Traversal**: Working directory locked to ComfyUI root
+
+## Documentation
+
+- `README.md` - This file (main documentation)
+- `COMFY_CLI_API.md` - Complete comfy-cli API reference
+- `COMFY_CLI_QUICKSTART.md` - comfy-cli quick start guide
+- `AGENTS.md` - Development guide for agentic coding
 
 ## License
 
@@ -276,3 +401,4 @@ Contributions welcome! Please:
 - [ComfyUI Documentation](https://docs.comfy.org/)
 - [ComfyUI-Manager](https://github.com/ltdrdata/ComfyUI-Manager)
 - [cm-cli Documentation](https://github.com/Comfy-Org/ComfyUI-Manager/blob/main/docs/en/cm-cli.md)
+- [comfy-cli](https://github.com/Comfy-Org/comfy-cli)
