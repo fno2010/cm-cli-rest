@@ -6,8 +6,6 @@ import logging
 from .api.handlers.config import ConfigHandler
 from .api.handlers.models import ModelHandler
 from .api.handlers.comfy_nodes import NodeHandler
-from .handlers.models import ModelHandler
-from .handlers.nodes import NodeHandler
 from .comfy_cli import ComfyCliExecutor
 
 logger = logging.getLogger(__name__)
